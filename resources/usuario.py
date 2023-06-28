@@ -38,11 +38,26 @@ class UserRegister(Resource):
 class UserLogin(Resource):
     @classmethod
     def post(cls):
+        atributos = reqparse.RequestParser()
+        atributos.add_argument('login', type=str, required=True, help="This field 'login' cannot be left empty.")
+        atributos.add_argument('senha', type=str, required=True, help="This field 'senha' cannot be left empty.")
         dados = atributos.parse_args()
 
         user = UserModel.find_by_login(dados['login'])
-        if user and check_password_hash(user.senha, dados['senha']): # Solução adquada para versão atual do werkzeug
-        # if user and safe_str_cmp(user.senha, dados['senha']): Versão para werkzeug antigo
+        if user and check_password_hash(user.senha, dados['senha']):
             token_de_acesso = create_access_token(identity=user.user_id)
             return {'access_token': token_de_acesso}, 200
         return {'message': 'The username or password is incorrect.'}, 401
+
+
+### Esse código vai ficar ficar comentando pois estou tentando um problema na requisição do User cadastrado ###
+# class UserLogin(Resource):
+#     @classmethod
+#     def post(cls):
+#         dados = atributos.parse_args()
+#         user = UserModel.find_by_login(dados['login'])
+#         if user and check_password_hash(user.senha, dados['senha']): # Solução adquada para versão atual do werkzeug
+#         # if user and safe_str_cmp(user.senha, dados['senha']): Versão para werkzeug antigo
+#             token_de_acesso = create_access_token(identity=user.user_id)
+#             return {'access_token': token_de_acesso}, 200
+#         return {'message': 'The username or password is incorrect.'}, 401

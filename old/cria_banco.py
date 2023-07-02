@@ -1,6 +1,6 @@
 import sqlite3
 
-connection = sqlite3.connect('instance/banco.db')
+connection = sqlite3.connect('banco.db') # instance_OLD/
 cursor = connection.cursor()
 
 cria_tabela = "CREATE TABLE IF NOT EXISTS hoteis (hoteis_id text PRIMARY KEY, nome text, \

@@ -19,12 +19,14 @@ def cria_banco():
     banco.create_all()
 
 @jwt.token_in_blocklist_loader
-def verificar_blacklist(jwt_header, token):
+def verifica_blacklist(self, token): # como solução foi inserido o construtor self junto ao token
+# def verificar_blacklist(jwt_header, token):
     return token['jti'] in BLACKLIST
 
 @jwt.revoked_token_loader
-def token_de_acesso_invalidado():
-    return jsonify({'message': 'You have been logged out.'}), 401 # Unauthorized
+def token_de_acesso_invalidado(jwt_header, jwt_data):
+    return jsonify({'message': 'You have been logged out.', 'error': 'token_revoked'}), 401 # Unauthorized
+    # return jsonify({'message': 'You have been logged out.'}), 401 # Unauthorized
 
 api.add_resource(Hoteis, '/hoteis')
 api.add_resource(Hotel, '/hoteis/<string:hotel_id>')

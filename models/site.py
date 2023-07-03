@@ -7,7 +7,6 @@ class SiteModel(banco.Model):
     url = banco.Column(banco.String(80))
     hoteis = banco.relationship('HotelModel') # lista de objetos hoteis
 
-
     def __init__(self, url):
         self.url = url
 

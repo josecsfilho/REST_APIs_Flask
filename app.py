@@ -11,7 +11,7 @@ from blacklist import BLACKLIST
 
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///../banco.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://josefilho:Sistem@tic0@josefilho.mysql.pythonanywhere-services.com/josefilho$db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = 'DontTellAnyone'
 app.config['JWT_BLACKLIST_ENABLED'] = True

@@ -1,3 +1,6 @@
+import traceback
+from flask import make_response, render_template
+
 from flask_restful import Resource, reqparse
 from sqlalchemy.sql.functions import user
 
@@ -12,6 +15,7 @@ atributos = reqparse.RequestParser()
 atributos.add_argument('login', type=str, required=True, help="This  filed 'login' cannot be left too")
 atributos.add_argument('senha', type=str, required=True, help="This  filed 'senha' cannot be left too")
 atributos.add_argument('ativado', type=bool)
+atributos.add_argument('email', type=str, required=True, help="This field 'email' cannot be left blank.")
 
 class User(Resource):
     # /usuarios/{user_id}
@@ -34,16 +38,27 @@ class UserRegister(Resource):
     # /cadastro
     def post(self):
         dados = atributos.parse_args()
+        if not dados.get('email') or dados.get('email') is None:
+            return {"message": "The field 'email' cannot be left blank."}, 400
+
+        if UserModel.find_by_email(dados['email']):
+            return {"message": "The email '{}' already exists.".format(dados['email'])}, 400  # Bad Request
 
         if UserModel.find_by_login(dados['login']):
-            return {"message": "The login '{}' already exists.".format(dados['login'])}
+            return {"message": "The login '{}' already exists.".format(dados['login'])}, 400  # Bad Request
 
         hashed_password = bcrypt.hashpw(dados['senha'].encode('utf-8'), bcrypt.gensalt())
         dados['senha'] = hashed_password.decode('utf-8')
 
         user = UserModel(**dados)
         user.ativado = False
-        user.save_user()
+        try:
+            user.save_user()
+            user.send_confirmation_email()
+        except:
+            user.delete_user()
+            traceback.print_exc()
+            return {'message': 'An internal server error has ocurred.'}, 500
         return {'message': 'User created successfully!'}, 201
 
 
@@ -79,4 +94,6 @@ class UserConfirm(Resource):
 
         user.ativado = True
         user.save_user()
-        return {"message": "User id '{}' confirmed successfully.".format(user_id)}, 200
+        # return {"message": "User id '{}' confirmed successfully.".format(user_id)}, 200
+        headers = {'Content-Type': 'text/html'}
+        return make_response(render_template('user_confirm.html', email=user.email, usuario=user.login),200, headers)
